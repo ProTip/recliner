@@ -17,3 +17,35 @@ Nodes have a preference of cluster.  They will prefer to be in "Top" cluster.  T
 * Join this cluster if not already in it.
 * Determine if the cluster is converged(all nodes are in the top cluster).
 * Rinse and repeat.
+* 
+Example
+=======
+
+```ruby
+require 'recliner'
+
+members = %w(192.168.1.20 192.168.1.21 192.168.1.22 192.168.1.23)
+
+members.each do |member|
+  joiners << Recliner::ClusterJoiner.new( 
+  :hostname => member,
+  :members => members - [member], 
+  :username => 'Administrator', 
+  :password => 'Password')
+end
+
+def converge(joiners)
+  converged = Array.new(joiners.count, false)
+  while converged.include?(false)
+    puts 'Running joins...'
+    joiners.each.with_index do |joiner, i|
+      joiner.join
+      converged[i] = joiner.converged?
+    end
+    sleep 4
+  end
+  puts 'Converged!'
+end
+```
+
+
